@@ -28,7 +28,7 @@ class TestCacheIndex(TestCase):
 
     def test_index_saves_cache(self):
         """Проверка кеширования главной страницы."""
-        count_posts_before_add_new = Post.objects.count()
+        count_posts = Post.objects.count()
         one_extra_post = Post.objects.create(
             text=f'Тестовый пост №{r(1,100)}',
             author=TestCacheIndex.user,
@@ -38,14 +38,14 @@ class TestCacheIndex(TestCase):
         response = self.client.get(reverse('posts:index'))
         # Получаем контекст после создания "one_extra_post"
         context = response.context['page_obj'][0]
-        # Сравниваем поле полученного контекста с полем 
+        # Сравниваем поле полученного контекста с полем
         # созданного поста
         self.assertEqual(context.text, one_extra_post.text)
         # Считаем общее кол-во постов в базе
-        count_aftee_add_extra_post= Post.objects.count()
+        count_aftee_add_extra_post = Post.objects.count()
         # Проверяем, что количество постов после создания
         # нового увеличилось на '1'
-        self.assertEqual(count_posts_before_add_new + 1, count_aftee_add_extra_post)
+        self.assertEqual(count_posts + 1, count_aftee_add_extra_post)
         # Удаляем пост
         one_extra_post.delete()
         # Делаем новый запрос к главной странице

@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from ..models import Comment, Group, Post, User, Follow
+from ..models import Group, Post, User, Follow
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 NUMBER_OF_POSTS = 14
@@ -16,6 +16,7 @@ EXSPECTED_AMOUNT_OF_POSTS_FIRST_PAGE = 10
 EXSPECTED_AMOUNT_OF_POSTS_SECOND_PAGE = int(
     NUMBER_OF_POSTS - EXSPECTED_AMOUNT_OF_POSTS_FIRST_PAGE
 )
+
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostPagesTests(TestCase):
@@ -140,13 +141,13 @@ class PostPagesTests(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_page_context_contains_image(self):
-        small_gif = (            
-             b'\x47\x49\x46\x38\x39\x61\x02\x00'
-             b'\x01\x00\x80\x00\x00\x00\x00\x00'
-             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-             b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-             b'\x0A\x00\x3B'
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
         )
         uploaded = SimpleUploadedFile(
             name='small.gif',
@@ -161,7 +162,8 @@ class PostPagesTests(TestCase):
         )
         urls = [
             reverse('posts:index', None),
-            reverse('posts:group_list', kwargs={'slug': PostPagesTests.post.group.slug}),
+            reverse('posts:group_list', kwargs={
+                'slug': PostPagesTests.post.group.slug}),
             reverse('posts:profile', kwargs={'username': PostPagesTests.user}),
         ]
         for url in urls:
@@ -174,12 +176,14 @@ class PostPagesTests(TestCase):
                 'post_id': post_whith_image.id})
         )
         post_detail_context_with_image = response.context['post']
-        self.assertEqual(post_detail_context_with_image.image, f'posts/{uploaded.name}')
+        self.assertEqual(
+            post_detail_context_with_image.image,
+            f'posts/{uploaded.name}'
+        )
 
     def test_comments_for_authorized_users(self):
         """
-        Проверка возможности отправки комментария только для 
-        авторизироанного пользователя.
+        Проверка возможности комментария для авторизироанного пользователя.
         Проверка наличия коммента на странице поста.
         """
         comment_form = {
@@ -188,18 +192,20 @@ class PostPagesTests(TestCase):
         # Отправка комментария авторизированным пользователем
         response_for_auth = self.authorized_client.post(
             reverse('posts:add_comment', kwargs={
-                'post_id': PostPagesTests.post.id}), data=comment_form, 
-                )
+                'post_id': PostPagesTests.post.id}),
+            data=comment_form,
+        )
         # Отправка комментария неавторизированным пользователем
         response_for_guest = self.guest_client.post(
             reverse('posts:add_comment', kwargs={
-                'post_id': PostPagesTests.post.id}), data=comment_form
-                )
-        # Проверка редиректа после отправки коммента 
+                'post_id': PostPagesTests.post.id}),
+            data=comment_form
+        )
+        # Проверка редиректа после отправки коммента
         # авторизированным пользователем
         self.assertRedirects(response_for_auth, reverse(
             'posts:post_detail', kwargs={'post_id': PostPagesTests.post.id}),)
-        # Проверка редиректа после попытке написать коммент 
+        # Проверка редиректа после попытке написать коммент
         # неавторизированным пользователем
         self.assertEqual(response_for_guest.status_code, 302)
         # Получение респонса от страницы поста, где был
@@ -213,11 +219,6 @@ class PostPagesTests(TestCase):
         # Проверка соотвествия коммента, полученного из контеста
         # отправленному комменту
         self.assertEqual(context.text, comment_form['text'])
-
-
-    def test_follow_redir_unauth_user(self):
-        response = self.guest_client.get('posts:follow_index')
-        self.assertTrue(response.status_code in (301, 302))
 
     def test_autherised_can_follow(self):
         """Проверяем возможность подписки авторизованного пользователя"""
