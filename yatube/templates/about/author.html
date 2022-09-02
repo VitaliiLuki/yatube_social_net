@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}
+<title>Об авторе проекта</title>
+{% endblock %}
+
+
+{% load static %}
+{% block content %}
+<body>
+<div class = "container">
+<h2 align="center">
+  <i>Привет, дорогой друг! Я автор этого сайта, это мой первенец, не суди строго<span>&#x1F609</span> </i>
+</h2>
+</div>
+<object data={% static "img/2GU.gif" %} align="center" width="400" height="400" vspace = "10", hspace="10">
+  <param name="quality" value="high">
+  <param name="wmode" value="opaque">
+</object>
+<div class = "container">
+<p>
+  <h3 align="center">
+    Немного обо мне:
+  </h3>
+</p>
+<p>
+  <ul>
+<li>В программировании я совсем недавно и хотелось бы остаться насовсем.</li>
+<li>
+  Хочу сменить род дейстельности, 
+  стать причастным к разработке полезных IT - продуктов и 
+  быть среди таких же замотивированных, вдохновленных единомышленников. 
+</li>
+  </ul>
+</p>
+<p>
+<a href="https://github.com/VitaliiLuki">
+Моя ссылка на Github
+</a>
+</p>
+</div>
+</body>
+{% endblock %}

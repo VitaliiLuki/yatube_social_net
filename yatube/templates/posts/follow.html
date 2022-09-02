@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block  title %}
+    <title>Интересные посты</title>
+{% endblock  %}
+{% load thumbnail %}
+
+
+{% block  content %}
+{% include 'includes/switcher.html' %}
+<div class="container py-5">     
+  <h1>Страница подписок</h1>
+  <article>
+  {% for post in page_obj %}
+    <ul>
+      <li>
+        Автор: {{ post.author.get_full_name }}
+        <a href={% url 'posts:profile' post.author.username %}>
+          Все посты пользователя
+        </a>
+      </li>
+      <li>
+        Дата публикации: {{ post.pub_date|date:"d E Y" }}
+      </li>
+    </ul> 
+    <div class="card">
+    {% thumbnail post.image "960x500" crop="center" upscale=True as im %}
+      <img class="card-img my-2" src="{{ im.url }}">
+    {% endthumbnail %}
+    </div>
+    <p>
+      {{ post.text }}
+    </p>
+    {% if post.group %}
+    <a href={% url 'posts:group_list' post.group.slug %}>все записи группы</a>
+    {% endif %}
+    {% if not forloop.last %}<hr>{% endif %}
+  {% endfor %}
+  {% include 'includes/paginator.html' %}
+  </article>
+</div>  
+{% endblock  %}
