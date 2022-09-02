@@ -136,7 +136,7 @@ USE_TZ = True
 
 # Указываем путь до дериктории, где будут храниться фото
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Указываем путь до статики, для подгрузки в html-шаблоны
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
@@ -154,4 +154,4 @@ CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     }
-} 
+}
