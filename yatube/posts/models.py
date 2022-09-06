@@ -9,12 +9,10 @@ class Comment(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='comments'
-        
     )
     created = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата и время отправки комментария'
-        
     )
     post = models.ForeignKey(
         'Post',
@@ -108,14 +106,3 @@ class Post(models.Model):
 
     class Meta:
         ordering = ("-pub_date",)
-
-
-
-
-
-
-
-
-
-
-

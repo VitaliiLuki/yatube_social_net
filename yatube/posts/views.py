@@ -5,10 +5,11 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 
 from .forms import CommentForm, PostForm
-from .models import Comment, Group, Post, User, Follow
+from .models import Group, Post, User, Follow
 
 NUMBER_OF_DISPLAYED_ITEMS: int = 10
-TIMEOUT_FOR_CACHE : int = 20
+TIMEOUT_FOR_CACHE: int = 20
+
 
 def paginator(post_list, request):
     """Пагинация постов"""
@@ -16,7 +17,6 @@ def paginator(post_list, request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj
-
 
 
 @cache_page(TIMEOUT_FOR_CACHE, key_prefix='index')
@@ -59,13 +59,9 @@ def profile(request, username):
 def post_detail(request, post_id):
     """Просмотр отдельного поста"""
     post = get_object_or_404(Post, pk=post_id)
-    number_of_posts = post.author.posts.count()
-    #comments = post.comments.all()
     form = CommentForm()
     context = {
         'post': post,
-        #'number_of_posts': number_of_posts,
-        #'comments': comments,    # Если убрать comments слетят тесты с контекстом
         'form': form,
     }
     return render(request, 'posts/post_detail.html', context)

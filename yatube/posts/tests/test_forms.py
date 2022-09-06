@@ -46,7 +46,6 @@ class PostCreateEditFormTests(TestCase):
         self.assertEqual(source_post.group, self.group)
         self.assertEqual(source_post.image.name, f'posts/{uploaded.name}')
 
-
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
@@ -89,7 +88,7 @@ class PostCreateEditFormTests(TestCase):
             'text': 'Какой-то тестовый текст',
             'group': self.group.id,
         }
-        response = self.client.post(
+        self.client.post(
             reverse('posts:post_create'),
             data=form_data
         )
@@ -114,7 +113,7 @@ class PostCreateEditFormTests(TestCase):
             reverse(
                 'posts:post_edit',
                 kwargs={
-                'post_id': self.post.id
+                    'post_id': self.post.id
                 }
             ),
             data=form_data,

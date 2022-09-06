@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from http import HTTPStatus
 
+
 def csrf_failure(request, reason=''):
     return render(request, 'core/403csrf.html')
 
@@ -10,7 +11,7 @@ def page_not_found(request, exception):
         request,
         'core/404.html',
         {'path': request.path},
-        status = HTTPStatus.NOT_FOUND
+        status=HTTPStatus.NOT_FOUND
     )
 
 

@@ -17,12 +17,12 @@ class PostAdmin(admin.ModelAdmin):
 class GroupAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'description',)
 
+
 class CommentAdmin(admin.ModelAdmin):
     list_display = ('author', 'created', 'post', 'text')
     list_filter = ('author', 'created')
 
-# При регистрации моделей Post, Group источником конфигурации для них назначаем
-# классs PostAdmin, GroupAdmin.
+
 admin.site.register(Post, PostAdmin)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(Comment, CommentAdmin)

@@ -230,7 +230,7 @@ class PostPagesTests(TestCase):
         # Проверка редиректа после отправки коммента
         # авторизированным пользователем
         self.assertRedirects(
-            response_for_auth, 
+            response_for_auth,
             reverse(
                 'posts:post_detail',
                 kwargs={'post_id': self.post.id}
@@ -252,7 +252,7 @@ class PostPagesTests(TestCase):
         self.assertNotEqual(
             response_for_content_detail.content,
             response_for_existent_comment.content
-            )
+        )
 
     def test_authorized_can_follow(self):
         """Проверяем возможность подписки авторизованного пользователя"""
@@ -265,8 +265,9 @@ class PostPagesTests(TestCase):
         )
         self.assertRedirects(
             response,
-            reverse('posts:profile',
-                    kwargs={'username': self.user}
+            reverse(
+                'posts:profile',
+                kwargs={'username': self.user}
             )
         )
         self.assertEqual(Follow.objects.count(), followers_count + 1)
