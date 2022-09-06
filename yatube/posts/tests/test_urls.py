@@ -23,19 +23,12 @@ class PostURLTests(TestCase):
             text='Тестовый текст тестового поста',
             group=cls.group
         )
-
-    def setUp(self):
-        # Создаем неавторезированный клиент
-        self.guest_client = Client()
-        # Создаем пользователя
-        self.user = PostURLTests.user
-        # Создаем авторезированный клиент
-        self.authorized_client = Client()
-        # Авторезируем пользователя
-        self.authorized_client.force_login(self.user)
+        cls.authorized_client = Client()
+        # Авторизируем пользователя
+        cls.authorized_client.force_login(cls.user)
         # Создаем автора
-        self.author_client = Client()
-        self.author_client.force_login(self.post.author)
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.post.author)
 
     def test_urls_exists_at_desired_location_no_authorized(self):
         """Проверка доступа к страницам для неавторизированных пользователей"""
@@ -43,17 +36,21 @@ class PostURLTests(TestCase):
             reverse('posts:index'),
             reverse(
                 'posts:group_list',
-                kwargs={'slug': PostURLTests.post.group.slug}),
+                kwargs={
+                    'slug': PostURLTests.post.group.slug}
+            ),
             reverse(
                 'posts:profile',
-                kwargs={'username': PostURLTests.user}),
+                kwargs={'username': PostURLTests.user}
+            ),
             reverse(
                 'posts:post_detail',
-                kwargs={'post_id': PostURLTests.post.id}),
+                kwargs={'post_id': PostURLTests.post.id}
+            ),
         ]
         for address in urls_available_for_any_users:
             with self.subTest(address=address):
-                response = self.guest_client.get(address)
+                response = self.client.get(address)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_urls_exists_at_desired_location_authorized(self):
@@ -76,13 +73,16 @@ class PostURLTests(TestCase):
         со страниц /create/, /posts/<int:post_id>/edit/ на /auth/login/."""
         urls_redirect_anonymous_user = {
             reverse('posts:post_create'): '/auth/login/?next=/create/',
-            reverse('posts:post_edit', kwargs={
-                'post_id': PostURLTests.post.id}):
-            f'/auth/login/?next=/posts/{PostURLTests.post.id}/edit/',
+            reverse(
+                'posts:post_edit',
+                kwargs={
+                    'post_id': PostURLTests.post.id
+                }
+            ): f'/auth/login/?next=/posts/{PostURLTests.post.id}/edit/',
         }
         for address, redirect_address in urls_redirect_anonymous_user.items():
             with self.subTest(address=address):
-                response = self.guest_client.get(address, follow=True)
+                response = self.client.get(address, follow=True)
                 self.assertRedirects(
                     response, redirect_address
                 )
@@ -94,14 +94,16 @@ class PostURLTests(TestCase):
             reverse('posts:index'): 'posts/index.html',
             reverse(
                 'posts:group_list',
-                kwargs={'slug': PostURLTests.post.group.slug}):
-            'posts/group_list.html',
-            reverse('posts:profile', kwargs={'username': PostURLTests.user}):
-            'posts/profile.html',
+                kwargs={'slug': PostURLTests.post.group.slug}
+            ): 'posts/group_list.html',
+            reverse(
+                'posts:profile',
+                kwargs={'username': PostURLTests.user}
+            ): 'posts/profile.html',
             reverse(
                 'posts:post_detail',
-                kwargs={'post_id': PostURLTests.post.id}):
-            'posts/post_detail.html',
+                kwargs={'post_id': PostURLTests.post.id}
+            ): 'posts/post_detail.html',
             reverse('posts:post_create'): 'posts/create_post.html',
         }
         for address, template in templates_url_names.items():
@@ -116,6 +118,6 @@ class PostURLTests(TestCase):
 
     def test_url_of_non_existent_page(self):
         """Проверка ответа от несуществующей страницы"""
-        response = self.guest_client.get('/non_existent/')
+        response = self.client.get('/non_existent/')
         self.assertTemplateUsed(response, 'core/404.html')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

@@ -8,29 +8,31 @@ from .forms import CommentForm, PostForm
 from .models import Comment, Group, Post, User, Follow
 
 NUMBER_OF_DISPLAYED_ITEMS: int = 10
-
+TIMEOUT_FOR_CACHE : int = 20
 
 def paginator(post_list, request):
+    """Пагинация постов"""
     paginator = Paginator(post_list, NUMBER_OF_DISPLAYED_ITEMS)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj
 
 
-# Главная страница проекта
-@cache_page(20, key_prefix='index')
+
+@cache_page(TIMEOUT_FOR_CACHE, key_prefix='index')
 def index(request):
-    text = 'Это главная страница проекта Yatube'
+    """Главная страница проекта"""
+    page_title = 'Это главная страница проекта Yatube'
     post_list = Post.objects.all()
     context = {
-        'text': text,
+        'page_title': page_title,
         'page_obj': paginator(post_list, request),
     }
     return render(request, 'posts/index.html', context)
 
 
-# Просмотр всех постов выбранной группы
 def group_posts(request, slug):
+    """Просмотр всех постов выбранной группы"""
     group = get_object_or_404(Group, slug=slug)
     post_list = group.posts.all()
     context = {
@@ -40,63 +42,54 @@ def group_posts(request, slug):
     return render(request, 'posts/group_list.html', context)
 
 
-# Страничка профиля
 def profile(request, username):
+    """Страничка профиля"""
     author = get_object_or_404(User, username=username)
-    post_list = author.posts.select_related('author').order_by('-pub_date')
-    count = author.posts.count()
-    following = False
-    if request.user.is_authenticated:
-        following = (Follow.objects.filter(
-            user=request.user,
-            author=User.objects.filter(username=username)[0]).exists)
+    post_list = author.posts.select_related('author')
+    following = author.following.filter(user=request.user.id).exists()
     context = {
         'author': author,
         'page_obj': paginator(post_list, request),
-        'count': count,
+        'count': author.posts.count(),
         'following': following
     }
     return render(request, 'posts/profile.html', context)
 
 
-# Просмотр отдельного поста
 def post_detail(request, post_id):
+    """Просмотр отдельного поста"""
     post = get_object_or_404(Post, pk=post_id)
-    username = post.author.username
     number_of_posts = post.author.posts.count()
-    comments = Comment.objects.filter(post_id=post_id)
+    #comments = post.comments.all()
     form = CommentForm()
     context = {
         'post': post,
-        'username': username,
-        'title': str(post),
-        'number_of_posts': number_of_posts,
-        'comments': comments,
+        #'number_of_posts': number_of_posts,
+        #'comments': comments,    # Если убрать comments слетят тесты с контекстом
         'form': form,
     }
     return render(request, 'posts/post_detail.html', context)
 
 
-# Создание нового поста
 @login_required(login_url='users:login')
 def post_create(request):
+    """Создание нового поста"""
     template = 'posts/create_post.html'
     form = PostForm(
         request.POST or None,
         files=request.FILES or None,
     )
-    if request.method == 'POST':
-        if form.is_valid():
-            new_post = form.save(commit=False)
-            new_post.author = request.user
-            new_post.save()
-            return redirect('posts:profile', request.user)
+    if form.is_valid():
+        new_post = form.save(commit=False)
+        new_post.author = request.user
+        new_post.save()
+        return redirect('posts:profile', request.user)
     return render(request, template, {'form': form})
 
 
-# Редактирование поста
 @login_required(login_url='users:login')
 def post_edit(request, post_id):
+    """Редактирование поста"""
     template = 'posts/create_post.html'
     post = get_object_or_404(Post, id=post_id)
     if request.user != post.author:
@@ -117,9 +110,9 @@ def post_edit(request, post_id):
     )
 
 
-# Добавление комментариев к постам
 @login_required(login_url='users:login')
 def add_comment(request, post_id):
+    """Добавление комментариев к постам"""
     post = get_object_or_404(Post, id=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
@@ -130,9 +123,9 @@ def add_comment(request, post_id):
     return redirect('posts:post_detail', post_id=post_id)
 
 
-# Страница интересных авторов
 @login_required(login_url='users:login')
 def follow_index(request):
+    """Страница интересных авторов"""
     post_list = Post.objects.filter(author__following__user=request.user)
     template = 'posts/follow.html'
     context = {
@@ -141,11 +134,13 @@ def follow_index(request):
     return render(request, template, context)
 
 
-# Подписк на интересных авторов
 @login_required(login_url='users:login')
 def profile_follow(request, username):
+    """Подписка на интересных авторов"""
     try:
-        Follow.objects.create(
+        # Если убрать кострукцию try except IntegrityError вылетает ошибка
+        # not self follow из constrains в class Meta модели Follow
+        Follow.objects.get_or_create(
             user=request.user,
             author=User.objects.filter(username=username)[0]
         )
@@ -154,9 +149,9 @@ def profile_follow(request, username):
     return redirect('posts:profile', username=username)
 
 
-# Отприска от авторов
 @login_required(login_url='users:login')
 def profile_unfollow(request, username):
+    """Отписка от авторов"""
     Follow.objects.filter(
         user=request.user,
         author=User.objects.filter(username=username)[0]

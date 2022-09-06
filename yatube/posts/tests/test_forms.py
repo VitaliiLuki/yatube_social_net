@@ -1,7 +1,7 @@
 import shutil
 import tempfile
 from multiprocessing.connection import Client
-from random import randint as r
+from random import randint
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -29,11 +29,9 @@ class PostCreateEditFormTests(TestCase):
             author=cls.user,
             group=cls.group,
         )
-
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(PostCreateEditFormTests.user)
-        self.small_gif = (
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
+        cls.small_gif = (
             b'\x47\x49\x46\x38\x39\x61\x02\x00'
             b'\x01\x00\x80\x00\x00\x00\x00\x00'
             b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
@@ -41,6 +39,13 @@ class PostCreateEditFormTests(TestCase):
             b'\x02\x00\x01\x00\x00\x02\x02\x0C'
             b'\x0A\x00\x3B'
         )
+
+    def check_for_post_existence(self, source_post, form_data, uploaded):
+        self.assertEqual(source_post.text, form_data['text'])
+        self.assertEqual(source_post.author, self.user)
+        self.assertEqual(source_post.group, self.group)
+        self.assertEqual(source_post.image.name, f'posts/{uploaded.name}')
+
 
     @classmethod
     def tearDownClass(cls):
@@ -51,7 +56,7 @@ class PostCreateEditFormTests(TestCase):
         """Проверка создания нового поста на странице '/create/'."""
         old_post_count = Post.objects.count()
         uploaded = SimpleUploadedFile(
-            name=f'{r(1,99)}small.gif',
+            name=f'{randint(1,99)}small.gif',
             content=self.small_gif,
             content_type='image/gif'
         )
@@ -66,15 +71,29 @@ class PostCreateEditFormTests(TestCase):
         )
         self.assertRedirects(
             response,
-            reverse('posts:profile', kwargs={
-                'username': PostCreateEditFormTests.post.author})
+            reverse(
+                'posts:profile',
+                kwargs={
+                    'username': PostCreateEditFormTests.post.author
+                }
+            )
         )
         self.assertEqual(Post.objects.count(), (old_post_count + 1))
         new_post = Post.objects.first()
-        self.assertEqual(new_post.text, form_data['text'])
-        self.assertEqual(new_post.author, self.user)
-        self.assertEqual(new_post.group, self.group)
-        self.assertEqual(new_post.image.name, f'posts/{uploaded.name}')
+        self.check_for_post_existence(new_post, form_data, uploaded)
+
+    def test_сreate_post_for_unauthorized(self):
+        """Проверка создания поста неавторизированным пользователем"""
+        old_post_count = Post.objects.count()
+        form_data = {
+            'text': 'Какой-то тестовый текст',
+            'group': self.group.id,
+        }
+        response = self.client.post(
+            reverse('posts:post_create'),
+            data=form_data
+        )
+        self.assertEqual(old_post_count, Post.objects.count())
 
     def test_post_edit(self):
         """
@@ -82,7 +101,7 @@ class PostCreateEditFormTests(TestCase):
         """
         old_post_count = Post.objects.count()
         uploaded = SimpleUploadedFile(
-            name=f'{r(100,199)}small.gif',
+            name=f'{randint(100,199)}small.gif',
             content=self.small_gif,
             content_type='image/gif'
         )
@@ -92,19 +111,24 @@ class PostCreateEditFormTests(TestCase):
             'image': uploaded,
         }
         response = self.authorized_client.post(
-            reverse('posts:post_edit', kwargs={
-                'post_id': PostCreateEditFormTests.post.id}),
+            reverse(
+                'posts:post_edit',
+                kwargs={
+                'post_id': self.post.id
+                }
+            ),
             data=form_data,
             follow=True
         )
         self.assertEqual(Post.objects.count(), old_post_count)
         edited_post = Post.objects.get(id=self.post.id)
-        self.assertEqual(edited_post.text, form_data['text'])
-        self.assertEqual(edited_post.author, self.user)
-        self.assertEqual(edited_post.group, self.group)
-        self.assertEqual(edited_post.image.name, f'posts/{uploaded.name}')
+        self.check_for_post_existence(edited_post, form_data, uploaded)
         self.assertRedirects(
             response,
-            reverse('posts:post_detail', kwargs={
-                'post_id': PostCreateEditFormTests.post.id})
+            reverse(
+                'posts:post_detail',
+                kwargs={
+                    'post_id': self.post.id
+                }
+            )
         )
