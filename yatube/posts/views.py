@@ -46,8 +46,9 @@ def profile(request, username):
     """Страничка профиля"""
     author = get_object_or_404(User, username=username)
     post_list = author.posts.select_related('author')
-    following = author.following.filter(user=request.user.id).exists()
+    following = author.following.filter(user__id=request.user.id).exists()
     context = {
+        'request': request,
         'author': author,
         'page_obj': paginator(post_list, request),
         'count': author.posts.count(),
@@ -58,7 +59,7 @@ def profile(request, username):
 
 def post_detail(request, post_id):
     """Просмотр отдельного поста"""
-    post = get_object_or_404(Post, pk=post_id)
+    post = get_object_or_404(Post, id=post_id)
     form = CommentForm()
     context = {
         'post': post,
@@ -75,6 +76,12 @@ def post_create(request):
         request.POST or None,
         files=request.FILES or None,
     )
+    # Если сделать условие в стиле "if not form.is_valid()""
+    # и сразу редирект, то сохранение формы сдвигается левее.
+    # В таком случае не совсем понятно как выполнить return render 
+    # шаблона и формы, а также return редирект после сохранения
+    # формы. Пробовал объединить - не вышло.
+    # Буду благодарен за пояснение, комментарий потом удалю.
     if form.is_valid():
         new_post = form.save(commit=False)
         new_post.author = request.user
@@ -95,14 +102,13 @@ def post_edit(request, post_id):
         files=request.FILES or None,
         instance=post,
     )
-    if request.method == 'POST':
-        if form.is_valid():
-            form.save()
-            return redirect('posts:post_detail', post_id)
-    return render(request, template, {
-        'form': form,
-        'post': post,
-        'is_edit': True}
+    if form.is_valid():
+        form.save()
+        return redirect('posts:post_detail', post_id)
+    return render(
+        request,
+        template, 
+        {'form': form,'post': post, 'is_edit': True}
     )
 
 
@@ -133,15 +139,9 @@ def follow_index(request):
 @login_required(login_url='users:login')
 def profile_follow(request, username):
     """Подписка на интересных авторов"""
-    try:
-        # Если убрать кострукцию try except IntegrityError вылетает ошибка
-        # not self follow из constrains в class Meta модели Follow
-        Follow.objects.get_or_create(
-            user=request.user,
-            author=User.objects.filter(username=username)[0]
-        )
-    except IntegrityError:
-        return redirect('posts:profile', username=username)
+    author = get_object_or_404(User, username=username)
+    if request.user != author:
+        Follow.objects.get_or_create(author=author, user=request.user)
     return redirect('posts:profile', username=username)
 
 
