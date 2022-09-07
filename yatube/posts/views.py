@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 
@@ -78,7 +77,7 @@ def post_create(request):
     )
     # Если сделать условие в стиле "if not form.is_valid()""
     # и сразу редирект, то сохранение формы сдвигается левее.
-    # В таком случае не совсем понятно как выполнить return render 
+    # В таком случае не совсем понятно как выполнить return render
     # шаблона и формы, а также return редирект после сохранения
     # формы. Пробовал объединить - не вышло.
     # Буду благодарен за пояснение, комментарий потом удалю.
@@ -107,8 +106,8 @@ def post_edit(request, post_id):
         return redirect('posts:post_detail', post_id)
     return render(
         request,
-        template, 
-        {'form': form,'post': post, 'is_edit': True}
+        template,
+        {'form': form, 'post': post, 'is_edit': True}
     )
 
 
