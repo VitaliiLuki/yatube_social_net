@@ -14,20 +14,37 @@
     <ul>
       <li>
         <a href={% url 'posts:profile' post.author.username %}>
-          Автор: {{ post.author.get_full_name }}
+          Author: {{ post.author.username }}
         </a>
       </li>
       <li>
-        Дата публикации: {{ post.pub_date|date:"d E Y" }}
+        Publication date: {{ post.pub_date|date:"d E Y" }}
       </li>
     </ul>      
-    {% thumbnail post.image "960x500" crop="center" upscale=True as im %}
-      <img class="card-img my-2" src="{{ im.url }}">
-    {% endthumbnail %}
-    <p>
-      {{ post.text }}
-    </p>
-      {% if not forloop.last %}<hr>{% endif %}
+    <div class="card">
+      {% thumbnail post.image "700x500" crop="left" upscale=True as im %}
+      <div class="content row">
+        <div class="col-md-6">
+        <table width="100%" cellspacing="10" cellpadding="10">
+          <tr>
+            <td class="leftcol">
+              <img 
+                style="margin:{{ im|margin:"700x500" }}" 
+                src="{{ im.url }}" 
+                width="{{ im.x }}" 
+                height="{{ im.y }}" 
+                hspace="20">
+            </td>
+            <td valign="top">
+              {{ post.text }}
+            </td>
+          </tr>
+        </table>
+        </div>
+      </div>
+      {% endthumbnail %}
+    </div>
+    {% if not forloop.last %}<hr>{% endif %}
     {% endfor %}
     {% include 'includes/paginator.html' %}
 </div>  

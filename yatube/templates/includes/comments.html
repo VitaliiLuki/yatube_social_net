@@ -1,14 +1,14 @@
 {% load user_filters %}
 {% if user.is_authenticated %}
   <div class="card my-4">
-    <h5 class="card-header">Добавить комментарий:</h5>
+    <h5 class="card-header">Add a comment:</h5>
     <div class="card-body">
       <form method="post" action="{% url 'posts:add_comment' post.id %}">
         {% csrf_token %}      
         <div class="form-group mb-2">
           {{ form.text|addclass:"form-control" }}
         </div>
-        <button type="submit" class="btn btn-primary">Отправить</button>
+        <button type="submit" class="btn btn-primary">Send</button>
       </form>
     </div>
   </div>
@@ -25,7 +25,7 @@
         <i>{{ comment.text }}<i> 
       </p>
       <p>
-        <font size="2"> <i> Комментарий отправлен: {{comment.created}}</i></font>
+        <font size="2"> <i> The comment was sent: {{comment.created}}</i></font>
       </p>
     </div>
   </div>

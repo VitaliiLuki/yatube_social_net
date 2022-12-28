@@ -6,6 +6,7 @@ app_name = 'posts_ns'
 urlpatterns = [
     path('', views.index, name='index'),
     path('create/', views.post_create, name='post_create'),
+    path('posts/<int:post_id>/post_delete/', views.post_delete, name='post_delete'),
     path('follow/', views.follow_index, name='follow_index'),
     path('group/<slug:slug>/', views.group_posts, name='group_list'),
     path('posts/<int:post_id>/', views.post_detail, name='post_detail'),

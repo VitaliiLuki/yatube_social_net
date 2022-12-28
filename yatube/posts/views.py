@@ -11,7 +11,7 @@ TIMEOUT_FOR_CACHE: int = 20
 
 
 def paginator(post_list, request):
-    """Пагинация постов"""
+    """Posts pagination."""
     paginator = Paginator(post_list, NUMBER_OF_DISPLAYED_ITEMS)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -20,8 +20,8 @@ def paginator(post_list, request):
 
 @cache_page(TIMEOUT_FOR_CACHE, key_prefix='index')
 def index(request):
-    """Главная страница проекта"""
-    page_title = 'Это главная страница проекта Yatube'
+    """The main page."""
+    page_title = 'This is the main page of yatube project.'
     post_list = Post.objects.all()
     context = {
         'page_title': page_title,
@@ -31,7 +31,7 @@ def index(request):
 
 
 def group_posts(request, slug):
-    """Просмотр всех постов выбранной группы"""
+    """All posts of the certain group."""
     group = get_object_or_404(Group, slug=slug)
     post_list = group.posts.all()
     context = {
@@ -42,7 +42,7 @@ def group_posts(request, slug):
 
 
 def profile(request, username):
-    """Страничка профиля"""
+    """Profile page."""
     author = get_object_or_404(User, username=username)
     post_list = author.posts.select_related('author')
     following = author.following.filter(user__id=request.user.id).exists()
@@ -55,9 +55,19 @@ def profile(request, username):
     }
     return render(request, 'posts/profile.html', context)
 
+def post_delete(request, post_id):
+    """Delete certain post."""
+    post = get_object_or_404(Post, id=post_id)
+    post_author = post.author.username
+    if request.user != post_author:
+        return redirect('posts:profile', post.author.username)
+    else:
+        post.delete()
+        return redirect('posts:profile', request.user)
+
 
 def post_detail(request, post_id):
-    """Просмотр отдельного поста"""
+    """View a certain post."""
     post = get_object_or_404(Post, id=post_id)
     form = CommentForm()
     context = {
@@ -69,18 +79,12 @@ def post_detail(request, post_id):
 
 @login_required(login_url='users:login')
 def post_create(request):
-    """Создание нового поста"""
+    """Post creation."""
     template = 'posts/create_post.html'
     form = PostForm(
         request.POST or None,
         files=request.FILES or None,
     )
-    # Если сделать условие в стиле "if not form.is_valid()""
-    # и сразу редирект, то сохранение формы сдвигается левее.
-    # В таком случае не совсем понятно как выполнить return render
-    # шаблона и формы, а также return редирект после сохранения
-    # формы. Пробовал объединить - не вышло.
-    # Буду благодарен за пояснение, комментарий потом удалю.
     if form.is_valid():
         new_post = form.save(commit=False)
         new_post.author = request.user
@@ -91,7 +95,7 @@ def post_create(request):
 
 @login_required(login_url='users:login')
 def post_edit(request, post_id):
-    """Редактирование поста"""
+    """Post editing."""
     template = 'posts/create_post.html'
     post = get_object_or_404(Post, id=post_id)
     if request.user != post.author:
@@ -113,7 +117,7 @@ def post_edit(request, post_id):
 
 @login_required(login_url='users:login')
 def add_comment(request, post_id):
-    """Добавление комментариев к постам"""
+    """To add a comment to a certain post."""
     post = get_object_or_404(Post, id=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
@@ -126,7 +130,7 @@ def add_comment(request, post_id):
 
 @login_required(login_url='users:login')
 def follow_index(request):
-    """Страница интересных авторов"""
+    """The page of subscriptions."""
     post_list = Post.objects.filter(author__following__user=request.user)
     template = 'posts/follow.html'
     context = {
@@ -137,7 +141,7 @@ def follow_index(request):
 
 @login_required(login_url='users:login')
 def profile_follow(request, username):
-    """Подписка на интересных авторов"""
+    """To subscribe to your favorite author."""
     author = get_object_or_404(User, username=username)
     if request.user != author:
         Follow.objects.get_or_create(author=author, user=request.user)
@@ -146,7 +150,7 @@ def profile_follow(request, username):
 
 @login_required(login_url='users:login')
 def profile_unfollow(request, username):
-    """Отписка от авторов"""
+    """Unsubscribe of author."""
     Follow.objects.filter(
         user=request.user,
         author=User.objects.filter(username=username)[0]

@@ -1,29 +1,29 @@
 {% extends 'base.html' %}
 
 {% block  title %}
-  Профайл пользователя {{ author.get_full_name }}
+  User's profile{{ author.get_full_name }}
 {% endblock  %}
 
 {% load thumbnail %}
 {% block  content %}
   <div class="container py-5">  
     <div class="mb-5">     
-      <h1>Все посты пользователя: {{ author.get_full_name }}</h1>
-      <h3>Всего постов: {{ count }} </h3>  
+      <h2>All posts: {{ author }}</h2>
+      <h3>Number of posts: {{ count }} </h3>  
       {% if request.user != author %} 
         {% if following %} 
         <a
           class="btn btn-lg btn-light"
           href="{% url 'posts:profile_unfollow' author.username %}" role="button"
         >
-          Отписаться
+        unsubscribe
         </a>
         {% else %}
           <a
             class="btn btn-lg btn-primary"
             href="{% url 'posts:profile_follow' author.username %}" role="button"
           >
-          Подписаться
+          subscribe
         </a>
         {% endif %}
       {% endif %}
@@ -32,27 +32,43 @@
     {% for post in page_obj %}
       <ul>
         <li>
-            Автор: {{ post.author.get_full_name }}
-          <a href="{% url 'posts:profile' author.username %}">все посты пользователя</a>
+            Author: {{ post.author.get_full_name }}
+          <a href="{% url 'posts:profile' author.username %}">all user posts </a>
         </li>
         <li>
-          Дата публикации: {{ post.pub_date|date:"d E Y" }}
+          Publication date: {{ post.pub_date|date:"d E Y" }}
         </li>
       </ul>
-      {% thumbnail post.image "960x500" crop="center" upscale=True as im %}
-        <img class="card-img my-2" src="{{ im.url }}">
-      {% endthumbnail %}
-      <p>
-        {{ post.text }}
-      </p>
-      <p><a href="{% url 'posts:post_detail' post.id %}">подробная информация </a></p>
+      <div class="card">
+        {% thumbnail post.image "700x500" crop="left" upscale=True as im %}
+        <div class="content row">
+          <div class="col-md-6">
+          <table width="100%" cellspacing="10" cellpadding="10">
+            <tr>
+              <td class="leftcol">
+                <img 
+                  style="margin:{{ im|margin:"700x500" }}" 
+                  src="{{ im.url }}" 
+                  width="{{ im.x }}" 
+                  height="{{ im.y }}" 
+                  hspace="20">
+              </td>
+              <td valign="top">
+                {{ post.text|truncatewords:50 }}
+                <p>...</p
+                <p><a href="{% url 'posts:post_detail' post.id %}">Read full text</a></p>
+              </td>
+            </tr>
+          </table>
+          </div>
+        </div>
+        {% endthumbnail %}
+      </div>
     </article>       
     {% if post.group %}
     <p>
-      <a href="{% url 'posts:group_list' post.group.slug %}">все записи группы</a>
+      <a href="{% url 'posts:group_list' post.group.slug %}">All posts of the group</a>
     </p>
-    {% else %}
-      <a>Этот пост пока не опубликовала ни одна из групп</a>
     {% endif%}
     <hr>
     {% if not forloop.last %}<hr>{% endif %}

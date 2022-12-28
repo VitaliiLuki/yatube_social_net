@@ -1,37 +1,54 @@
 {% extends 'base.html' %}
 
 {% block  title %}
-Интересные посты
+Interesting posts
 {% endblock  %}
 
 {% load thumbnail %}
 {% block  content %}
 {% include 'includes/switcher.html' %}
 <div class="container py-5">     
-  <h1>Страница подписок</h1>
+  <h1>The page of subscriptions</h1>
   <article>
   {% for post in page_obj %}
     <ul>
       <li>
-        Автор: {{ post.author.get_full_name }}
+        Author: {{ post.author.get_full_name }}
         <a href={% url 'posts:profile' post.author.username %}>
-          Все посты пользователя
+          All posts of user
         </a>
       </li>
       <li>
-        Дата публикации: {{ post.pub_date|date:"d E Y" }}
+        Publication date: {{ post.pub_date|date:"d E Y" }}
       </li>
     </ul> 
     <div class="card">
-    {% thumbnail post.image "960x500" crop="center" upscale=True as im %}
-      <img class="card-img my-2" src="{{ im.url }}">
-    {% endthumbnail %}
+      {% thumbnail post.image "700x500" crop="left" upscale=True as im %}
+      <div class="content row">
+        <div class="col-md-6">
+        <table width="100%" cellspacing="10" cellpadding="10">
+          <tr>
+            <td class="leftcol">
+              <img 
+                style="margin:{{ im|margin:"700x500" }}" 
+                src="{{ im.url }}" 
+                width="{{ im.x }}" 
+                height="{{ im.y }}" 
+                hspace="20">
+            </td>
+            <td valign="top">
+              {{ post.text|truncatewords:50 }}
+              <p>...</p
+              <p><a href="{% url 'posts:post_detail' post.id %}">Read full text</a></p>
+            </td>
+          </tr>
+        </table>
+        </div>
+      </div>
+      {% endthumbnail %}
     </div>
-    <p>
-      {{ post.text }}
-    </p>
     {% if post.group %}
-      <a href={% url 'posts:group_list' post.group.slug %}>все записи группы</a>
+      <a href={% url 'posts:group_list' post.group.slug %}>All posts of the group</a>
     {% endif %}
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}

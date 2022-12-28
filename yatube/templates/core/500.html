@@ -7,7 +7,7 @@
 {% block content %}
 <h1>Custom 500</h1>
 <p>
-  Страницу с адресом {{ path }} не удалось открыть из-за внутренней ошибки сервера =(
+  Page with endpoint {{ path }} didn't manage to opent due to internal server error =(
 </p>
-<a href="{% url 'posts:index' %}">Идите на главную</a>
+<a href="{% url 'posts:index' %}">Follow the main page</a>
 {% endblock %}
