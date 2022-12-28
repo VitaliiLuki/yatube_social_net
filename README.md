@@ -86,4 +86,4 @@ Endpoints:
 
 Tech stack
 
-Python, Django 
+Python, Django, HTML
