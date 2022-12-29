@@ -1,89 +1,98 @@
-# Yatube_social_net)
+# Yatube social net
 This is a project of a simple social network where users can create, edit and comment on posts, subscribe to each other. View the latest posts of all users on the main page, or go to the subscriptions page and see posts only by the authors you like. Individual author profile pages and a detailed view of a particular post are also available.
 
 ## Local setup
-Clone repository and go to directory "yatube_social_net"
+> Clone repository and go to directory "yatube_social_net"
 
-git clone https://github.com/VitaliiLuki/yatube_social_net.git
-cd yatube_social_net/
+```git clone https://github.com/VitaliiLuki/yatube_social_net.git```
 
-Create and activate virtual environment
+```cd yatube_social_net/```
 
-python3 -m venv venv 
-source venv/bin/activate
+>Create and activate virtual environment
 
-Install all dependencies from requirements.txt
+```python3 -m venv venv```
 
-pip install --upgrade pip
-python3 -m pip install -r requirements.txt
+```source venv/bin/activate```
 
-Go to directory with a manage.py, make migrations and run server
+>Install all dependencies from requirements.txt
 
-cd yatube
-python3 manage.py migrate
-python3 manage.py runserver
+```pip install --upgrade pip```
 
-Endpoints:
+```python3 -m pip install -r requirements.txt```
 
-- Registration, entering to website and password reset:
+>Go to directory with a manage.py, make migrations and run server
 
-    1. To registrate a new user:
+```cd yatube```
 
-        /auth/signup/
+```python3 manage.py migrate```
 
-    2. To log in to website:
+```python3 manage.py runserver```
 
-        /auth/signin/
+## Endpoints:
 
-    3. To change a password:
+>Registration, entering to website and password reset:
 
-        /auth/password_change/
+   1. To registrate a new user:
 
-    4. To reset a passwoed:
+        ```/auth/signup/```
 
-        /auth/password_reset/
 
-- User activities on a website:
+   2. To log in to website:
 
-    1. To create a new post:
 
-        /create/
+        ```/auth/signin/```
 
-    2. To edit/delete/comment the post:
 
-        /posts/<int:post_id>/edit/
-        /posts/<int:post_id>/delete/
-        /posts/<int:post_id>/comment/
+   3. To change a password:
 
-    3. Watch all user's posts(main page):
 
-        /
+        ```/auth/password_change/```
 
-    4. Watch posts of your favorite authors:
+   4. To reset a password:
 
-        /follow/
+        ```/auth/password_reset/```
 
-    5. Go to author's profile:
+>User activities on a website:
 
-        /profile/<str:username>/
+   1. To create a new post:
 
-    6. To subscribe/unsubscribe to/from the author:
+        ```/create/```
 
-        /profile/<str:username>/follow/
-        /profile/<str:username>/unfollow/
+   2. To edit/delete/comment the post:
 
-    7. Watch posts which related to certain group:
+        ```/posts/<int:post_id>/edit/```
+        
+        ```/posts/<int:post_id>/delete/```
+        
+        ```posts/<int:post_id>/comment/```
 
-        /group/<slug:slug>/
+   3. Watch all user's posts(main page):
 
-- Admin page:
+        ```/```
 
-    /admin/
+   4. Watch posts of your favorite authors:
 
-- Information about person who created website:
+        ```/follow/```
 
-    /about/
+   5. Go to author's profile:
 
-Tech stack
+        ```/profile/<str:username>/```
 
-Python, Django, HTML
+   6. To subscribe/unsubscribe to/from the author:
+
+        ```/profile/<str:username>/follow/```
+        
+        ```/profile/<str:username>/unfollow/```
+
+   7. Watch posts which related to certain group:
+
+        ```/group/<slug:slug>/```
+        
+   8. Short information about developer who created website.
+
+        ```/about/```
+
+## Tech stack
+
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
