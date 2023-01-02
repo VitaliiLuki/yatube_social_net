@@ -18,7 +18,7 @@ This is a project of a simple social network where users can create, edit and co
 
 ```pip install --upgrade pip```
 
-```python3 -m pip install -r requirements.txt```
+```pip install -r requirements.txt```
 
 >Go to directory with a manage.py, make migrations and run server
 
